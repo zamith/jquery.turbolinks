@@ -11,13 +11,15 @@
 $ = window.jQuery or require?('jquery')
 
 # List for store callbacks passed to `$` or `$.ready`
-named_callbacks = {}
+non_idempotent_callback = null
 callbacks = []
 
 # Call each callback in list
 ready = ->
   callback($) for callback in callbacks
-  named_callbacks[key]($) for key in Object.keys(named_callbacks)
+  if non_idempotent_callback?
+    non_idempotent_callback($)
+    non_idempotent_callback = null
 
 # Turbolinks ready event
 turbolinksReady = ->
@@ -33,8 +35,8 @@ $(ready)
 
 # Store callbacks in list on `$` and `$.ready`
 $.fn.ready = (callback) ->
-  if name? and name != ""
-    named_callbacks[callback.name] = callback
+  if callback.name? and callback.name == "run_once"
+    non_idempotent_callback = callback
   else
     callbacks.push(callback)
   callback($) if $.isReady
