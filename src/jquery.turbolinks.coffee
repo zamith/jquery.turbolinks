@@ -11,11 +11,13 @@
 $ = window.jQuery or require?('jquery')
 
 # List for store callbacks passed to `$` or `$.ready`
+named_callbacks = {}
 callbacks = []
 
 # Call each callback in list
 ready = ->
   callback($) for callback in callbacks
+  named_callbacks[key]($) for key in Object.keys(named_callbacks)
 
 # Turbolinks ready event
 turbolinksReady = ->
@@ -31,7 +33,10 @@ $(ready)
 
 # Store callbacks in list on `$` and `$.ready`
 $.fn.ready = (callback) ->
-  callbacks.push(callback)
+  if name? and name != ""
+    named_callbacks[callback.name] = callback
+  else
+    callbacks.push(callback)
   callback($) if $.isReady
 
 # Bind ready to passed event

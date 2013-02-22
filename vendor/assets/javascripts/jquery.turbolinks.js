@@ -12,18 +12,25 @@
 
 
 (function() {
-  var $, callbacks, fetch, ready, turbolinksReady;
+  var $, callbacks, fetch, named_callbacks, ready, turbolinksReady;
 
   $ = window.jQuery || (typeof require === "function" ? require('jquery') : void 0);
+
+  named_callbacks = {};
 
   callbacks = [];
 
   ready = function() {
-    var callback, _i, _len, _results;
-    _results = [];
+    var callback, key, _i, _j, _len, _len1, _ref, _results;
     for (_i = 0, _len = callbacks.length; _i < _len; _i++) {
       callback = callbacks[_i];
-      _results.push(callback($));
+      callback($);
+    }
+    _ref = Object.keys(named_callbacks);
+    _results = [];
+    for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+      key = _ref[_j];
+      _results.push(named_callbacks[key]($));
     }
     return _results;
   };
@@ -40,7 +47,11 @@
   $(ready);
 
   $.fn.ready = function(callback) {
-    callbacks.push(callback);
+    if ((typeof name !== "undefined" && name !== null) && name !== "") {
+      named_callbacks[callback.name] = callback;
+    } else {
+      callbacks.push(callback);
+    }
     if ($.isReady) {
       return callback($);
     }
